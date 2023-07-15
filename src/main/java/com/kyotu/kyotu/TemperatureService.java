@@ -12,15 +12,17 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 public class TemperatureService {
 
     Map<String, City> cities = new HashMap<>();
 
+    private long last_modified = 0;
+
     public List<AverageTemperature> getAverageTemperature(String cityName, File file) {
-        processFile(file);
+        if(isFileUpdated(file)) {
+            processFile(file);
+        }
 
         List<AverageTemperature> averateTemperature = new ArrayList<>();
         if (!cities.containsKey(cityName)) {
@@ -28,12 +30,12 @@ public class TemperatureService {
         } else {
             TreeMap<LocalDate, Double> temperatures = cities.get(cityName).getTemperatures();
 
-            List<List<Map.Entry<LocalDate, Double>>> collect = temperatures.entrySet()
+            List<List<Map.Entry<LocalDate, Double>>> groupedByYear = temperatures.entrySet()
                     .stream()
                     .collect(Collectors
                             .groupingBy(e -> e.getKey().getYear())).values().stream().toList();
 
-            collect.forEach(year -> averateTemperature
+            groupedByYear.forEach(year -> averateTemperature
                     .add(
                             new AverageTemperature(
                                     year.get(0).getKey().getYear(),
@@ -46,6 +48,7 @@ public class TemperatureService {
 
     public void processFile(File file) {
         try {
+            last_modified = file.lastModified();
             Reader reader = new BufferedReader(new FileReader(file));
             CsvToBean<ReadData> csvReader = new CsvToBeanBuilder<ReadData>(reader)
                     .withType(ReadData.class)
@@ -75,6 +78,10 @@ public class TemperatureService {
 
     public City getCity(String cityName) {
         return cities.get(cityName);
+    }
+
+    public boolean isFileUpdated(File file) {
+        return file.lastModified() > last_modified;
     }
 
 }
