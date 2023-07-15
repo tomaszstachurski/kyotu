@@ -49,6 +49,7 @@ public class TemperatureService {
     public void processFile(File file) {
         try {
             last_modified = file.lastModified();
+
             Reader reader = new BufferedReader(new FileReader(file));
             CsvToBean<ReadData> csvReader = new CsvToBeanBuilder<ReadData>(reader)
                     .withType(ReadData.class)
@@ -60,12 +61,12 @@ public class TemperatureService {
 
             List<ReadData> data = csvReader.parse();
             for(ReadData d : data) {
-                if (cities.containsKey(d.getCityName())) {
-                    City city = cities.get(d.getCityName());
+                if (cities.containsKey(d.getCityName().toLowerCase())) {
+                    City city = cities.get(d.getCityName().toLowerCase());
                     city.getTemperatures().put(d.getDate(), d.getTemperature());
                 }
-                if (!cities.containsKey(d.getCityName())) {
-                    City city = new City(d.getCityName());
+                if (!cities.containsKey(d.getCityName().toLowerCase())) {
+                    City city = new City(d.getCityName().toLowerCase());
                     city.getTemperatures().put(d.getDate(), d.getTemperature());
                     cities.put(city.getName(), city);
                 }

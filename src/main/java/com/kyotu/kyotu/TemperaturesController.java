@@ -28,7 +28,7 @@ public class TemperaturesController {
         URL resource = getClass().getClassLoader().getResource(RESOURCE);
         try {
             File file = Paths.get(resource.toURI()).toFile();
-            List<AverageTemperature> averageTemperatures = temperatureService.getAverageTemperature(StringUtils.capitalize(cityName), file);
+            List<AverageTemperature> averageTemperatures = temperatureService.getAverageTemperature(cityName, file);
             return averageTemperatures != null ? ResponseEntity.ok(averageTemperatures) : ResponseEntity.status(HttpStatus.NOT_FOUND).body("City not found!");
         } catch (URISyntaxException e) {
             e.printStackTrace();
