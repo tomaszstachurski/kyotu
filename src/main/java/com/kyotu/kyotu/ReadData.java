@@ -1,17 +1,21 @@
 package com.kyotu.kyotu;
 
 import com.opencsv.bean.CsvBindByPosition;
+import com.opencsv.bean.CsvDate;
+
+import java.time.LocalDate;
 
 public class ReadData {
 
     @CsvBindByPosition(position = 0)
     private String cityName;
 
+    @CsvDate(value = "yyyy-MM-dd")
     @CsvBindByPosition(position = 1)
-    private String date;
+    private LocalDate date;
 
     @CsvBindByPosition(position = 2)
-    private String temperature;
+    private Double temperature;
 
     public String getCityName() {
         return cityName;
@@ -21,19 +25,19 @@ public class ReadData {
         this.cityName = cityName;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public String getTemperature() {
+    public Double getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(String temperature) {
+    public void setTemperature(Double temperature) {
         this.temperature = temperature;
     }
 }

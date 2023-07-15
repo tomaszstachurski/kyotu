@@ -27,10 +27,6 @@ public class TemperatureService {
             return null;
         } else {
             TreeMap<LocalDate, Double> temperatures = cities.get(cityName).getTemperatures();
-            temperatures.keySet()
-                    .stream()
-                    .map(LocalDate::getYear)
-                    .collect(toList());
 
             List<List<Map.Entry<LocalDate, Double>>> collect = temperatures.entrySet()
                     .stream()
@@ -41,7 +37,7 @@ public class TemperatureService {
                     .add(
                             new AverageTemperature(
                                     year.get(0).getKey().getYear(),
-                                    Precision.round(year.stream().mapToDouble(e -> e.getValue()).average().orElse(Double.NaN), 1))));
+                                    Precision.round(year.stream().mapToDouble(Map.Entry::getValue).average().orElse(Double.NaN), 1))));
 
         }
 
@@ -51,22 +47,23 @@ public class TemperatureService {
     public void processFile(File file) {
         try {
             Reader reader = new BufferedReader(new FileReader(file));
-            CsvToBean csvReader = new CsvToBeanBuilder(reader)
+            CsvToBean<ReadData> csvReader = new CsvToBeanBuilder<ReadData>(reader)
                     .withType(ReadData.class)
                     .withSeparator(';')
                     .withIgnoreLeadingWhiteSpace(true)
                     .withIgnoreEmptyLine(true)
+                    .withThrowExceptions(false)
                     .build();
 
             List<ReadData> data = csvReader.parse();
             for(ReadData d : data) {
                 if (cities.containsKey(d.getCityName())) {
                     City city = cities.get(d.getCityName());
-                    city.getTemperatures().put(LocalDate.parse(d.getDate()), Double.parseDouble(d.getTemperature()));
+                    city.getTemperatures().put(d.getDate(), d.getTemperature());
                 }
                 if (!cities.containsKey(d.getCityName())) {
                     City city = new City(d.getCityName());
-                    city.getTemperatures().put(LocalDate.parse(d.getDate()), Double.parseDouble(d.getTemperature()));
+                    city.getTemperatures().put(d.getDate(), d.getTemperature());
                     cities.put(city.getName(), city);
                 }
             }
