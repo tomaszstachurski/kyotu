@@ -1,25 +1,24 @@
 package com.kyotu.kyotu.model;
 
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.TreeMap;
 
 public class City {
 
-    private String name;
+    private final String name;
 
-    private TreeMap<LocalDate, Double> temperatures;
+    private final TreeMap<Integer, TemperatureByYear> temperatures;
 
-    public City (String name) {
+    public City(String name) {
         this.name = name;
-        temperatures = new TreeMap<>();
+        this.temperatures = new TreeMap<>();
     }
 
     public String getName() {
         return name;
     }
 
-    public TreeMap<LocalDate, Double> getTemperatures() {
+    public TreeMap<Integer, TemperatureByYear> getTemperatures() {
         return temperatures;
     }
 
@@ -28,7 +27,7 @@ public class City {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         City city = (City) o;
-        return name.equals(city.name);
+        return name.equals(city.getName());
     }
 
     @Override

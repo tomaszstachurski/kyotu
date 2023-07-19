@@ -1,7 +1,6 @@
 package com.kyotu.kyotu;
 
 import com.kyotu.kyotu.model.AverageTemperature;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,7 @@ import java.util.List;
 @RestController
 public class TemperaturesController {
 
-    String RESOURCE = "data/example_file.csv";
+    private final String RESOURCE = "data/example_file.csv";
 
     @Autowired
     TemperatureService temperatureService;
