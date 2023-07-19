@@ -40,7 +40,11 @@ public class TemperatureService {
         return averateTemperatures;
     }
 
-    public void processFile(File file) {
+    public void addCity(City city) {
+        this.cities.put(city.getName(), city);
+    }
+
+    private void processFile(File file) {
         try {
             last_modified = file.lastModified();
             cities.clear();

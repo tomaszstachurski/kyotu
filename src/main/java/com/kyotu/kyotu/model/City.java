@@ -22,6 +22,10 @@ public class City {
         return temperatures;
     }
 
+    public void addTemperatures(TemperatureByYear temperature) {
+        this.temperatures.put(temperature.getYear(), temperature);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
