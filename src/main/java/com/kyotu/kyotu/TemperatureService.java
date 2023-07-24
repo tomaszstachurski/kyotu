@@ -6,10 +6,12 @@ import com.kyotu.kyotu.model.TemperatureByYear;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.apache.commons.math3.util.Precision;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TemperatureService {
@@ -22,26 +24,20 @@ public class TemperatureService {
         if (isFileUpdated(file)) {
             processFile(file);
         }
-
-        List<AverageTemperature> averateTemperatures = new ArrayList<>();
-
         if (!cities.containsKey(cityName)) {
             return null;
         }
 
         TreeMap<Integer, TemperatureByYear> temperatures = cities.get(cityName).getTemperatures();
 
-        temperatures.forEach((key, value) -> {
-            AverageTemperature averageTemperature = new AverageTemperature(value.getYear(),
-                    Precision.round(value.getSumOfTemperatures() / value.getNumberOfDays(), 1));
-            averateTemperatures.add(averageTemperature);
-        });
-
-        return averateTemperatures;
+        return temperatures.values().stream()
+                .map(temp -> new AverageTemperature(temp.getYear(),
+                    Precision.round(temp.getSumOfTemperatures() / temp.getNumberOfDays(), 1)))
+                .collect(Collectors.toList());
     }
 
-    public void addCity(City city) {
-        this.cities.put(city.getName(), city);
+    private boolean isFileUpdated(File file) {
+        return file.lastModified() > last_modified;
     }
 
     private void processFile(File file) {
@@ -58,41 +54,26 @@ public class TemperatureService {
                     .withThrowExceptions(false)
                     .build();
 
-            Iterator<ReadData> iterator = csvReader.iterator();
-            while(iterator.hasNext()) {
-                ReadData data = iterator.next();
+            csvReader.iterator().forEachRemaining(csvRow -> {
+                City city = cities.getOrDefault(csvRow.getCityName().toLowerCase(), new City(csvRow.getCityName().toLowerCase()));
 
-                City city;
-                if (cities.containsKey(data.getCityName().toLowerCase())) {
-                    city = cities.get(data.getCityName().toLowerCase());
-                } else {
-                    city = new City(data.getCityName().toLowerCase());
-                }
-
-                TemperatureByYear temperature;
-                if(city.getTemperatures().containsKey(data.getDate().getYear())) {
-                    temperature = city.getTemperatures().get(data.getDate().getYear());
-                } else {
-                    temperature = new TemperatureByYear(data.getDate().getYear());
-
-                }
-                temperature.setNumberOfDays(temperature.getNumberOfDays() + 1);
-                temperature.setSumOfTemperatures(temperature.getSumOfTemperatures() + data.getTemperature());
+                TemperatureByYear temperature = getTemperatureByYear(csvRow, city);
                 city.getTemperatures().put(temperature.getYear(), temperature);
-                cities.put(city.getName(), city);
-            }
+                cities.putIfAbsent(city.getName(), city);
+            });
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(TemperatureService.class).error("Data not found!", e);
         }
     }
 
-    public City getCity(String cityName) {
-        return cities.get(cityName);
-    }
+    private TemperatureByYear getTemperatureByYear(ReadData csvRow, City city) {
+        TemperatureByYear temperature = city.getTemperatures().getOrDefault(csvRow.getDate().getYear(),
+                new TemperatureByYear(csvRow.getDate().getYear()));
 
-    private boolean isFileUpdated(File file) {
-        return file.lastModified() > last_modified;
+        temperature.incrementNumberOfDays();
+        temperature.addTemperature(csvRow.getTemperature());
+        return temperature;
     }
 
 }

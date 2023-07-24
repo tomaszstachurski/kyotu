@@ -33,4 +33,12 @@ public class TemperatureByYear {
     public void setSumOfTemperatures(double sumOfTemperatures) {
         this.sumOfTemperatures = sumOfTemperatures;
     }
+
+    public void incrementNumberOfDays() {
+        this.numberOfDays++;
+    }
+
+    public void addTemperature(double temperature) {
+        this.sumOfTemperatures += temperature;
+    }
 }
